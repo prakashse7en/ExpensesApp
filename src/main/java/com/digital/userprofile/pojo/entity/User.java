@@ -1,10 +1,7 @@
 package com.digital.userprofile.pojo.entity;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,11 +15,13 @@ import java.util.UUID;
 
 @Entity
 @Data
+@Table(name = "user")
 public class User {
 
     @Id
+    @Column(name = "userId", columnDefinition = "BINARY(16)")
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private UUID userId;
 
     private String userName;
     @ToString.Exclude

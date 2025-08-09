@@ -10,7 +10,7 @@ import org.mapstruct.MappingConstants;
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface UserProfileMapper {
 
-    @Mapping(target = "id", source = "userId")
+    @Mapping(target = "userId", source = "userId")
     @Mapping(target = "userName", source = "userName")
     @Mapping(target = "userEmail", source = "userEmail")
     User toEntity(UserRequestModel userRequestModel);
