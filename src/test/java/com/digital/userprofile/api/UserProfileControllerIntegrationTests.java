@@ -1,8 +1,10 @@
 package com.digital.userprofile.api;
 
 import com.digital.userprofile.ContainersConfig;
+import com.digital.userprofile.pojo.entity.User;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.restassured.RestAssured;
+import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,17 +15,20 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import static com.digital.userprofile.api.utils.TestUtils.getPostResponse;
 import static io.restassured.RestAssured.given;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @Import(ContainersConfig.class)
-class ProductControllerTests {
+class UserProfileControllerIntegrationTests {
 
   static final String GRANT_TYPE_CLIENT_CREDENTIALS = "password";
   static final String CLIENT_ID = "expenses-clientid";
@@ -57,14 +62,38 @@ class ProductControllerTests {
   void shouldGetUserWithAuthToken() {
     String token = getToken();
 
-    given()
+    Response response = getPostResponse(token);
+
+    User user = response.as(User.class);
+    assertNotNull(user);
+    int statusCode = response.getStatusCode();
+
+    Response response1 =given()
             .header("Authorization", "Bearer " + token)
             .contentType("application/json")
             .when()
-            .get("/api/user")
-            .then()
-            .statusCode(200);
+            .get("/api/user/" + user.getUserId());
+    User user1 = response.as(User.class);
+    assertNotNull(user1);
+    int statusCode1 = response1.getStatusCode();
+    assert(200 == statusCode);
   }
+
+
+
+
+  @Test
+  void shouldPostUserWithAuthToken() {
+    String token = getToken();
+
+    Response response = getPostResponse(token);
+
+    User user = response.as(User.class);
+    assertNotNull(user);
+    int statusCode = response.getStatusCode();
+    assert(200 == statusCode);
+  }
+
 
 
   @Test

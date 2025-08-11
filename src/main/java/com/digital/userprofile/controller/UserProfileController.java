@@ -7,20 +7,26 @@ import com.digital.userprofile.pojo.requestmodel.UserRequestModel;
 import com.digital.userprofile.service.UserProfileService;
 import io.micrometer.common.util.StringUtils;
 import org.mapstruct.factory.Mappers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 public class UserProfileController {
+
+    private Logger logger = LoggerFactory.getLogger(UserProfileController.class);
 
     @Autowired
     UserProfileService userProfileService;
 
-    @GetMapping("/api/user")
+    @GetMapping("/api/user/{userId}")
     @PreAuthorize("hasRole('clientadmin')")
-    public String getUserProfile() {
-        return "user";
+    public User getUserProfile(@PathVariable("userId") UUID userId) {
+        return userProfileService.getUserById(userId);
     }
 
     @PostMapping("/api/user")
@@ -47,10 +53,11 @@ public class UserProfileController {
             throw new IllegalArgumentException("User ID cannot be null or empty");
         }
         // Logic to get a user by ID and patch it
-        System.out.println(userRequestModel);
+        logger.info("Patching user with ID: {}", userRequestModel.getUserId());
         UserProfileMapper userProfileMapper =Mappers.getMapper( UserProfileMapper.class );
         user = userProfileMapper.toEntity(userRequestModel);
-        return userProfileService.updateUser(user);
+        user = userProfileService.updateUser(user);
+        return user;
     }
 
 }
