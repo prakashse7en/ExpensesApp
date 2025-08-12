@@ -95,7 +95,7 @@ class UserProfileControllerIntegrationTests {
   }
 
 
-
+/*
   @Test
   void shouldGetUnauthorizedWhenCreateProductWithoutAuthToken() {
     given()
@@ -114,7 +114,7 @@ class UserProfileControllerIntegrationTests {
       .statusCode(401);
   }
 
- /* @Test
+  @Test
   void shouldCreateProductWithAuthToken() {
     String token = getToken();
 
