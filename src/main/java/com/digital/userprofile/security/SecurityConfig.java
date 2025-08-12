@@ -1,15 +1,18 @@
 package com.digital.userprofile.security;
 
+import com.digital.userprofile.aop.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.http.HttpStatus;
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
-
 
 @Configuration
 @EnableWebSecurity
@@ -18,21 +21,24 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 public class SecurityConfig {
 
     private final JwtAuthConverter jwtAuthConverter;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(configurer ->
                         configurer
-                                .requestMatchers("/api/user/**"
-                                        )
+                                .requestMatchers("/api/user/**")
                                 .authenticated().anyRequest().permitAll())
                 .oauth2ResourceServer(oauth2 ->
                         oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthConverter))
+                                .authenticationEntryPoint(customAuthenticationEntryPoint)
+                )
+                .exceptionHandling(exceptionHandling ->
+                        exceptionHandling.authenticationEntryPoint(customAuthenticationEntryPoint)
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS));
         return http.build();
     }
-
 }
