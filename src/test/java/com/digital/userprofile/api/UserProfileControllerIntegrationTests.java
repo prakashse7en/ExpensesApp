@@ -2,9 +2,11 @@ package com.digital.userprofile.api;
 
 import com.digital.userprofile.ContainersConfig;
 import com.digital.userprofile.pojo.entity.User;
+import com.digital.userprofile.repository.UserProfileRepository;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.testcontainers.containers.MySQLContainer;
 
 import static com.digital.userprofile.api.utils.TestUtils.getPostResponse;
 import static io.restassured.RestAssured.given;
@@ -31,7 +34,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 class UserProfileControllerIntegrationTests {
 
   static final String GRANT_TYPE_CLIENT_CREDENTIALS = "password";
-  static final String CLIENT_ID = "expenses-clientid";
+  static final String CLIENT_ID = "expensesclientadmin"; //TODO JWT change
   static final String PASSWORD = "password";
   static final String USERNAME = "expensesuser";
 
@@ -41,9 +44,22 @@ class UserProfileControllerIntegrationTests {
   @Autowired
   OAuth2ResourceServerProperties oAuth2ResourceServerProperties;
 
+  @Autowired
+  UserProfileRepository userProfileRepository;
+
   @BeforeEach
   void setup() {
     RestAssured.port = port;
+  }
+
+  static final MySQLContainer<?> mySQLContainer = new MySQLContainer<>("mysql:8.0.30")
+          .withDatabaseName("testcontainer")
+          .withUsername("test")
+          .withPassword("test");
+
+  @BeforeAll
+  static void beforeAll() {
+    mySQLContainer.start();
   }
 
 
@@ -67,6 +83,10 @@ class UserProfileControllerIntegrationTests {
     User user = response.as(User.class);
     assertNotNull(user);
     int statusCode = response.getStatusCode();
+
+    User userEntity = userProfileRepository.findByUserId(user.getUserId());
+
+    assertNotNull(userEntity.getUserPhoneNumber());
 
     Response response1 =given()
             .header("Authorization", "Bearer " + token)

@@ -35,7 +35,7 @@ public class UserProfileService {
         return null;
     }
 
-    public User getUserById(UUID userId) {
+    public User getUserById(UUID userId) throws UserNotFoundException {
         try {
             User user = userProfileRepository.findByUserId(userId);
             if (user == null) {
@@ -44,8 +44,8 @@ public class UserProfileService {
             return user;
         } catch (Exception e) {
             logger.error("error occurred",e);
+            throw e;
         }
-        return null;
     }
 
     public User updateUser(User user) {

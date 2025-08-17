@@ -18,14 +18,14 @@ import java.util.UUID;
 @RestController
 public class UserProfileController {
 
-    private Logger logger = LoggerFactory.getLogger(UserProfileController.class);
+    private final Logger logger = LoggerFactory.getLogger(UserProfileController.class);
 
     @Autowired
     UserProfileService userProfileService;
 
     @GetMapping("/api/user/{userId}")
     @PreAuthorize("hasRole('clientadmin')")
-    public User getUserProfile(@PathVariable("userId") UUID userId) {
+    public User getUserProfile(@PathVariable("userId") UUID userId) throws UserNotFoundException {
         return userProfileService.getUserById(userId);
     }
 
@@ -38,7 +38,7 @@ public class UserProfileController {
             user = userProfileMapper.toEntity(userRequestModel);
             user =userProfileService.createUser(user);
         }catch(Exception e){
-            e.printStackTrace();
+            logger.error("error occurred while creating user", e);
         }
         return user;
     }

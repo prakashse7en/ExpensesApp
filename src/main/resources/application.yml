@@ -24,8 +24,8 @@ spring:
 jwt:
   auth:
     converter:
-      principle-attribute: expensesuser
-      resource-id: expenses-clientid
+      principle-attribute: expensesuser #TODO JWT change
+      resource-id: expensesclientadmin #TODO JWT change
 management:
   endpoint:
     health:

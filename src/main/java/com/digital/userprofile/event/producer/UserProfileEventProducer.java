@@ -19,11 +19,16 @@ public class UserProfileEventProducer {
 
     @Async
     public void sendUserProfileEvent(User user) {
-        if(null != user){
-            String userString = user.getUserId().toString();
-            kafkaProducerService.sendMessage(userString.getBytes());
-            logger.info("User profile event sent for user: {}", user.getUserId());
+        try{
+            if(null != user){
+                String userString = user.getUserId().toString();
+                kafkaProducerService.sendMessage(userString.getBytes());
+                logger.info("User profile event sent for user: {}", user.getUserId());
+            }
+        }catch (Exception e){
+            logger.error("Error occurred while sending user profile event", e);
         }
+
 
     }
 }
