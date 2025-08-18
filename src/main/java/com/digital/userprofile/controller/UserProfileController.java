@@ -43,21 +43,26 @@ public class UserProfileController {
         return user;
     }
 
-    //put user based on userId with id sent in path parameter
-    @PatchMapping("/api/user")
+
+    @PatchMapping("/api/user/{userId}")
     @PreAuthorize("hasRole('clientadmin')")
-    public User patchUser(@RequestBody UserRequestModel userRequestModel) throws UserNotFoundException {
+    public UserRequestModel patchUser(@PathVariable("userId") UUID userId,@RequestBody UserRequestModel userRequestModel) throws UserNotFoundException {
         User user = null;
 
-        if(StringUtils.isEmpty(userRequestModel.getUserId())){
+        if(StringUtils.isEmpty(String.valueOf(userId))){
             throw new IllegalArgumentException("User ID cannot be null or empty");
         }
-        // Logic to get a user by ID and patch it
-        logger.info("Patching user with ID: {}", userRequestModel.getUserId());
+
+        user = userProfileService.getUserById(userId);
+        if (user == null) {
+            throw new UserNotFoundException("User not found with ID: " + userRequestModel.getUserId());
+        }
+        logger.info("Patching user with ID: {}", userId);
         UserProfileMapper userProfileMapper =Mappers.getMapper( UserProfileMapper.class );
-        user = userProfileMapper.toEntity(userRequestModel);
+        userProfileMapper.updateEntity(user,userRequestModel);
         user = userProfileService.updateUser(user);
-        return user;
+        userRequestModel =  userProfileMapper.toRequestModel(user);
+        return userRequestModel;
     }
 
 }
